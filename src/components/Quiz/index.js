@@ -1,7 +1,12 @@
 import React, { Component } from 'react'
 import Levels from '../Levels/index'
 import ProgressBar from '../ProgressBar/index'
+import QuizOver from '../QuizOver/index'
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { QuizMarvel } from '../quizMarvel'
+
+toast.configure()
 
 class Quiz extends Component {
 
@@ -15,7 +20,9 @@ class Quiz extends Component {
         idQuestion: 0,
         btnDisabled: true,
         userAnwser: null,
-        score: 0
+        score: 0,
+        showWelcomeMsg: false,
+        quizEnd: false
     }
 
     storedDataRef = React.createRef()
@@ -30,6 +37,24 @@ class Quiz extends Component {
             })
         } else {
             console.log('Pas assez de questions')
+        }
+    }
+
+    showWelcomeMessage = pseudo => {
+        if (!this.state.showWelcomeMsg) {
+            this.setState({
+                showWelcomeMsg: true
+            })
+            toast.warn(`Bienvenue ${pseudo}, et bonne chance !`, {
+                position: "top-right",
+                autoClose: 2500,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: false,
+                progress: undefined,
+                bodyClassName: "toastify-color-welcome"
+                });
         }
     }
 
@@ -53,6 +78,9 @@ class Quiz extends Component {
 
             })
         }
+        if (this.props.userData.pseudo) {
+            this.showWelcomeMessage(this.props.userData.pseudo)
+        }
     }
     
     handleClick = selectedAnswer => {
@@ -62,9 +90,15 @@ class Quiz extends Component {
         })
     }
 
+    gameOver = () => {
+        this.setState({
+            quizEnd: true
+        })
+    }
+
     nextQuestion = () => {
         if (this.state.idQuestion === this.state.maxQuestions - 1 ) {
-
+            this.gameOver()
         } else {
             this.setState(prevState => ({
                 idQuestion: prevState.idQuestion + 1
@@ -75,6 +109,27 @@ class Quiz extends Component {
             this.setState( prevState => ({
                 score: prevState.score + 1
             }))
+            toast.success('Bravo + 1 !', {
+                position: "top-right",
+                autoClose: 2500,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: false,
+                progress: undefined,
+                bodyClassName: "toastify-color"
+                });
+        } else {
+            toast.error('Raté 0 !', {
+                position: "top-right",
+                autoClose: 2500,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: false,
+                progress: undefined,
+                bodyClassName: "toastify-color"
+                });
         }
     }
 
@@ -92,10 +147,16 @@ class Quiz extends Component {
             )
         })
 
-        return (
-            <div>
+        return this.state.quizEnd ? (
+            <QuizOver />
+        ) : 
+        (
+            <>
                 <Levels />
-                <ProgressBar />
+                <ProgressBar 
+                    idQuestion={this.state.idQuestion}
+                    maxQuestions={this.state.maxQuestions}
+                />
                 <h2>{this.state.question}</h2>
                 {displayOptions}
                 <button 
@@ -103,9 +164,9 @@ class Quiz extends Component {
                     className="btnSubmit"
                     onClick={this.nextQuestion}
                 >
-                Suivant
+                {this.state.idQuestion < this.state.maxQuestions - 1 ? "Suivant" : "Terminer"}
                 </button>
-            </div>
+            </>
         )
     }
 }
