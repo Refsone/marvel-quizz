@@ -32,7 +32,7 @@ const Welcome = props => {
         return () => {
             listener()
         }
-    }, [userSession])
+    }, [userSession, firebase, props.history])
 
     return userSession === null ? (
         <>

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { GiTrophyCup } from 'react-icons/gi'
 
 const QuizOver = React.forwardRef((props, ref) => {
     
@@ -7,7 +8,8 @@ const QuizOver = React.forwardRef((props, ref) => {
         score, 
         maxQuestions, 
         quizLevel, 
-        percent
+        percent,
+        loadLevelQuestions
     } = props
 
     const [asked, setAsked] = useState([])
@@ -17,7 +19,14 @@ const QuizOver = React.forwardRef((props, ref) => {
         setAsked(ref.current)
     },[ref])
 
+
+   
     const averageGrade = maxQuestions / 2
+
+    if (score < averageGrade) {
+        setTimeout(() => {loadLevelQuestions(0)}, 3000)
+    }
+
     const decision = score >= averageGrade ? (
         <>
             <div className="stepsBtnContainer">
@@ -25,15 +34,26 @@ const QuizOver = React.forwardRef((props, ref) => {
                 quizLevel < levelNames.length ? 
                 (
                     <>
-                        <p className="successMsg">Bravo, passez au niveau suivant !</p>
-                        <button className="btnResult success">Niveau suivant</button>
+                        <p className="successMsg">
+                        <GiTrophyCup size='50px'/> Bravo, passez au niveau suivant !</p>
+                        <button 
+                            className="btnResult success"
+                            onClick={() => loadLevelQuestions(quizLevel)}
+                            >
+                            Niveau suivant
+                        </button>
                     </>
                 )
                 :
                 (
                     <>
                         <p className="successMsg">Bravo, vous êtes un expert</p>
-                        <button className="btnResult gameOver">Niveau suivant</button>
+                        <button 
+                            className="btnResult gameOver"
+                            onClick={() => loadLevelQuestions(0)}
+                            >
+                            Accueil
+                        </button>
                     </>
                 )
             }
@@ -75,7 +95,10 @@ const QuizOver = React.forwardRef((props, ref) => {
     (
         <tr>
             <td colSpan="3">
-                <p style={{textAlign: "center", color: "red"}}>Pas de réponse</p>
+                <div className="loader"></div>
+                <p style={{textAlign: "center", color: "red"}}>
+                    Pas de réponse
+                </p>
             </td>
         </tr>
     )
